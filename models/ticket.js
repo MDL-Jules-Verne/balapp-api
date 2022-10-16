@@ -7,6 +7,7 @@ const ticket = mongoose.Schema({
     prenom: String,
     nom: String,
     externe: Boolean,
+    whoEntered: String,
     hasEntered: {type: Boolean, default: false},
     timestamps:{
         registered: Number,

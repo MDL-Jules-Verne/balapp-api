@@ -24,6 +24,7 @@ router.post("/addTickets", async (req, res) => {
     req.body.forEach((e) => {
         query.push({id: e.id})
     })
+    if(query.length <= 0) return res.sendStatus(200)
     let ticketsToEdit = await ticket.find({$or: query})
     // Will collect promises to run them in parallel
     let updatesInProgress = []

@@ -10,6 +10,7 @@ app.use(express.json());
 files.forEach((e,i)=>{
     app.use(`/${e.slice(0,e.length-3)}`, require(`./routes/${e}`))
 })
+//TODD: connect to a different database if it's the local server
 mongoose.connect(
     "mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false",
     {useNewUrlParser: true, useUnifiedTopology: true},

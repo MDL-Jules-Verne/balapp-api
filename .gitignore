@@ -1,3 +1,5 @@
 node_modules/
 .idea/vcs.xml
 node_modules/.package-lock.json
+.idea/
+balapp-tickets/.idea/

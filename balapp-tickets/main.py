@@ -70,7 +70,7 @@ for i in range(1, 501):
 
 print(time.time() - execStart)
 client = pymongo.MongoClient(
-    "mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false",
+    "mongodb://localhost:27017/balapp",
     serverSelectionTimeoutMS=5000)
 client = client["balapp"]
 

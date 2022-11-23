@@ -12,7 +12,6 @@ router.get("/ticketInfo/:id", async (req, res) => {
         } catch (e) {
             return res.status(400).send({success: false, res: "QRCode not found"})
         }
-        console.log(verify)
         if (verify == null) return res.status(404).send({success: false, res: "Ticket not found"})
         else res.send({success: true, res:verify})
     }catch(e){
@@ -22,5 +21,25 @@ router.get("/ticketInfo/:id", async (req, res) => {
 
 })
 
+router.post("/enterTicket", async (req,res) =>{
+    if(!req.body) return res.status(400).send("Body of request is necessary")
+    if(!req.body.id) return res.status(400).send("The body must contain the ID of the ticket")
+    let status = await ticket.updateOne({id: req.body.id}, {
+        "nom": req.body.nom.toLowerCase(),
+        "prenom": req.body.prenom.toLowerCase(),
+        "externe": req.body.externe,
+        "whoEntered": req.body.whoEntered.toLowerCase(),
+        "timestamps.registered": Date.now()
+    })
+
+    console.log(status)
+    if(!status.matchedCount || status.matchedCount === 0) {
+        return res.status(404).send("Ticket not found")
+    }
+    if(!status.modifiedCount || status.modifiedCount === 0){
+        return res.status(500).send("Ticket non modifié")
+    }
+    res.sendStatus(200);
+})
 
 module.exports = router

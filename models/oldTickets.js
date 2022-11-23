@@ -18,7 +18,7 @@ const ticketOld = mongoose.Schema({
             }
         }
     ],
-    date: Date
+    date: Number
 
 })
 module.exports = mongoose.model("oldTickets", ticketOld);

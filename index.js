@@ -33,8 +33,23 @@ server.on("request", app)
 wss.on("connection", (socket)=>{
     console.log(`connected:`);
     socket.on("message", async (message)=>{
-        console.log(`received: ${message}`);
-        socket.send(JSON.stringify({mode, db: await ticket.find()}))
+        let msg = message.toString();
+        if(msg === "hello") {
+            socket.send(JSON.stringify({mode, db: await ticket.find()}))
+        }
+        if(msg === "testConnection"){
+            socket.isAlive = true;
+        }
     })
 })
+const interval = setInterval(() => {
+    console.log(wss.clients.size)
+    wss.clients.forEach((socket) => {
+        // if(socket.isAlive === false) socket.terminate()
+        socket.isAlive = false
+        socket.send("testConnection");
+
+    })
+}, process.env.DELAY);
+
 server.listen(2000)

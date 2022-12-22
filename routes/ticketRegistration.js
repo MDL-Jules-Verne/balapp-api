@@ -8,6 +8,7 @@ router.get("/ticketInfo/:id", async (req, res) => {
         }
         let verify;
         try {
+            console.log("test");
             verify = await ticket.findOne({id: req.params.id})
         } catch (e) {
             return res.status(400).send({success: false, res: "QRCode not found"})

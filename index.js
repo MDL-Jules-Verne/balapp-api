@@ -28,7 +28,7 @@ mongoose.connect(
 let wss = new WSServer({
     server: server
 })
-const mode = "registerTickets"
+const mode = "bal"
 server.on("request", app)
 wss.on("connection", (socket)=>{
     console.log(`connected:`);

@@ -1,1 +1,1 @@
-POST http://localhost:2000/restoreOldTickets?id=634bfd9c9bb86f6d80169686
+GET http://localhost:2000/

@@ -84,6 +84,7 @@ for i in fullDb:
         "nom": "",
         "externe": False,
         "whoEntered": "",
+        "whoScanned": "",
         "hasEntered": False,
         "timestamps": {
             "registered": 0,

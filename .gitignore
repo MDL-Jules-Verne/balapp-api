@@ -3,3 +3,4 @@ node_modules/
 node_modules/.package-lock.json
 .idea/
 balapp-tickets/.idea/
+balapp-tickets/poppler-22.12.0

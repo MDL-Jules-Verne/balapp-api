@@ -1,20 +1,19 @@
 import csv
 
 import pymongo
-import qrcode
 from qrcode.image.styledpil import StyledPilImage
 import qrcode.image.svg
 import random
-import string
 import time
 from PIL import Image, ImageDraw, ImageFont
 
 chars = "RTPQSDFGHJKLWXCVB3456789"
 openSans = ImageFont.truetype('openSans.ttf', 34)
 openSansMini = ImageFont.truetype('openSans.ttf', 24)
-colors = ["green", "red", "blue", "yellow"]
-colorsFrench = ["vert", "rouge", "bleu", "jaune"]
+colorsFrench = ["violet", "bleu", "vert", "jaune", "orange", "rose"]
+salles = ["A", "B", "C", "D", "E", "F"]
 idLength = 4
+inter = ImageFont.truetype('Inter-Bold.ttf', 35)
 
 
 def get_random_string(size):
@@ -24,48 +23,49 @@ def get_random_string(size):
 usedIds = []
 fullDb = []
 colorNb = 0
-roomNb = 1
+roomNb = 0
 execStart = time.time()
+
 for i in range(1, 501):
     ticketData = {}
+    data = get_random_string(idLength)
     qr = qrcode.QRCode(
         version=1,
         border=1,
-        box_size=8,
+        box_size=16,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
     )
-    hasGeneratedId = False
+    # Get a random id and qrcode
     data = get_random_string(idLength)
     while data in usedIds:
         data = get_random_string(idLength)
-    ticketData["id"] = data
     qr.add_data(data)
     usedIds.append(data)
 
-    img = qr.make_image(image_factory=StyledPilImage, embeded_image_path="logo.jpg")
-    img.save(f"../../generated_qrs/output{i}.png")
-    qr_image = Image.open(f"../../generated_qrs/output{i}.png", )
-    ticket = Image.new(mode="RGBA", size=(1000, 250), color=colors[colorNb])
-    ticketData["couleur"] = colorsFrench[colorNb]
-
-    ticket.paste(qr_image, (1000 - 210, 15))
+    # Make image
+    img = qr.make_image(image_factory=StyledPilImage)
+    ticket = Image.open(f"./Frame 56.png")
+    ticket.paste(img, (1324, 57))
     I1 = ImageDraw.Draw(ticket)
-    I1.text((150, 100), "Bal d'hiver Lycée Jules Verne 2022", fill=(0, 0, 0), font=openSans)
+    _, _, w, h = I1.textbbox((0, 0), f"#{data}  -  {colorsFrench[colorNb]}  -  {roomNb}", font=inter)
+    # I1.text((1359 - 9, 428), f"#{data} - {colorsFrench[colorNb]} - {roomNb}", fill=(0, 0, 0), font=inter)
+    I1.text((1510-w/2, 425), f"#{data}  -  {colorsFrench[colorNb]}  -  {salles[roomNb]}", fill=(0, 0, 0), font=inter)
 
-    I1.text((1000 - 170, 197), data, fill=(0, 0, 0), font=openSans)
-    I1.text((40, 200), f"Vestiaire: {roomNb}", fill=(0, 0, 0), font=openSansMini)
-    ticketData["salle"] = roomNb
+    ticketData["couleur"] = colorsFrench[colorNb]
+    ticketData["salle"] = salles[roomNb]
+    ticketData["id"] = data
 
-    # ticket.show()
-    ticket.save(f"../../generated_qrs/output{i}.png")
+    ticket.save(f"../../generated_qrs/{ticketData['id']}.png")
     fullDb.append(ticketData)
     colorNb += 1
-    if colorNb >= len(colors):
+    if (roomNb == 0 or roomNb == 1 or roomNb == 2) and colorNb >= len(colorsFrench)-1:
+        colorNb += 1
+    if colorNb >= len(colorsFrench):
         colorNb = 0
         roomNb += 1
-        if roomNb >= 5:
-            roomNb = 1
-    if i % 300 == 0:
+        if roomNb >= 6:
+            roomNb = 0
+    if i % 50 == 0:
         print(i)
 
 print(time.time() - execStart)
@@ -84,7 +84,6 @@ for i in fullDb:
         "nom": "",
         "externe": False,
         "whoEntered": "",
-        "whoScanned": "",
         "hasEntered": False,
         "timestamps": {
             "registered": 0,

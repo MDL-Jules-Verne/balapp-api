@@ -13,6 +13,6 @@ for i in range(0, len(allTickets), 8):
             temp = Image.open(f"../../generated_qrs/{allTickets[i+i2]}")
         except IndexError:
             break
-        img.paste(temp, ((1753 + 15)*(i2 // 4), (542 + 15)*(i2 % 4)))
+        img.paste(temp, ((1753)*(i2 // 4), (542)*(i2 % 4)))
     # Make image based off of those arrays
     img.save(f"../../generated_qrs/pdfs/output{i}.pdf")

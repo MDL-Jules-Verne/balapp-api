@@ -32,7 +32,7 @@ mongoose.connect(
 let wss = new WSServer({
     server: server
 })
-const mode = "bal"
+const mode = "buy"
 server.on("request", app)
 wss.on("connection", (socket)=>{
     console.log(`connected:`);

@@ -111,7 +111,7 @@ for i in fullDb:
     })
 oldTickets = client["tickets"].find()
 listOldTickets = []
-# how_to_waste_energy.exe
+
 for i in oldTickets:
     listOldTickets.append(i)
 

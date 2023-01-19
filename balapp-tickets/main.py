@@ -1,17 +1,26 @@
-import csv
-
 import pymongo
 from qrcode.image.styledpil import StyledPilImage
 import qrcode.image.svg
 import random
 import time
 from PIL import Image, ImageDraw, ImageFont
+from tqdm import tqdm
 
 chars = "RTPQSDFGHJKLWXCVB3456789"
-openSans = ImageFont.truetype('openSans.ttf', 34)
-openSansMini = ImageFont.truetype('openSans.ttf', 24)
 colorsFrench = ["violet", "bleu", "vert", "jaune", "orange", "rose"]
 salles = ["A", "B", "C", "D", "E", "F"]
+ticketsByRoom = {}
+for i in salles:
+    ticketsByRoom[i] = {}
+    for ii in colorsFrench:
+        if i == "A" or i == "B" or i == "C":
+            if ii == "rose":
+                continue
+            ticketsByRoom[i][ii] = 16 if ii == 'violet' else 17
+        elif i == "D" or i == "E":
+            ticketsByRoom[i][ii] = 13 if ii == 'violet' or ii == 'bleu' else 14
+        else:
+            ticketsByRoom[i][ii] = 14
 idLength = 4
 inter = ImageFont.truetype('Inter-Bold.ttf', 35)
 
@@ -26,7 +35,7 @@ colorNb = 0
 roomNb = 0
 execStart = time.time()
 
-for i in range(1, 501):
+for i in tqdm(range(1, 501), desc="Creating Tickets", ncols=120):
     ticketData = {}
     data = get_random_string(idLength)
     qr = qrcode.QRCode(
@@ -49,7 +58,8 @@ for i in range(1, 501):
     I1 = ImageDraw.Draw(ticket)
     _, _, w, h = I1.textbbox((0, 0), f"#{data}  -  {colorsFrench[colorNb]}  -  {roomNb}", font=inter)
     # I1.text((1359 - 9, 428), f"#{data} - {colorsFrench[colorNb]} - {roomNb}", fill=(0, 0, 0), font=inter)
-    I1.text((1510-w/2, 425), f"#{data}  -  {colorsFrench[colorNb]}  -  {salles[roomNb]}", fill=(0, 0, 0), font=inter)
+    I1.text((1510 - w / 2, 425), f"#{data}  -  {colorsFrench[colorNb]}  -  {salles[roomNb]}", fill=(0, 0, 0),
+            font=inter)
 
     ticketData["couleur"] = colorsFrench[colorNb]
     ticketData["salle"] = salles[roomNb]
@@ -57,18 +67,26 @@ for i in range(1, 501):
 
     ticket.save(f"../../generated_qrs/{ticketData['id']}.png")
     fullDb.append(ticketData)
-    colorNb += 1
-    if (roomNb == 0 or roomNb == 1 or roomNb == 2) and colorNb >= len(colorsFrench)-1:
+    ticketsByRoom[salles[roomNb]][colorsFrench[colorNb]] -= 1
+    if ticketsByRoom[salles[roomNb]][colorsFrench[colorNb]] <= 0:
         colorNb += 1
-    if colorNb >= len(colorsFrench):
-        colorNb = 0
-        roomNb += 1
-        if roomNb >= 6:
-            roomNb = 0
-    if i % 50 == 0:
-        print(i)
+        if colorNb == 5 and roomNb < 3:
+            colorNb = 0
+            roomNb += 1
+        elif colorNb >= 6:
+            colorNb = 0
+            roomNb += 1
+    # colorNb += 1
+    # if (roomNb == 0 or roomNb == 1 or roomNb == 2) and colorNb >= len(colorsFrench) - 1:
+    #     colorNb += 1
+    # if colorNb >= len(colorsFrench):
+    #     colorNb = 0
+    #     roomNb += 1
+    #     if roomNb >= 6:
+    #         roomNb = 0
+random.shuffle(fullDb)
+print("Saving tickets...")
 
-print(time.time() - execStart)
 client = pymongo.MongoClient(
     "mongodb://localhost:27017/balapp",
     serverSelectionTimeoutMS=5000)

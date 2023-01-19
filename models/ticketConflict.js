@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ticket = mongoose.Schema({
     ticket: {
         id:String,
-        salle: Number,
+        salle: String,
         couleur: String,
         prenom: String,
         nom: String,

@@ -9,6 +9,10 @@ let WSServer = require('ws').Server
 app.use(express.json());
 
 // activate all routes from /routes
+app.use((req,res, next)=>{
+    console.log(req.path)
+    next()
+})
 files.forEach((e,i)=>{
     app.use(`/${e.slice(0,e.length-3)}`, require(`./routes/${e}`))
 })
@@ -45,7 +49,7 @@ wss.on("connection", (socket)=>{
 const interval = setInterval(() => {
     console.log(wss.clients.size)
     wss.clients.forEach((socket) => {
-        // if(socket.isAlive === false) socket.terminate()
+        if(socket.isAlive === false && process.env.PROD === true) socket.terminate()
         socket.isAlive = false
         socket.send("testConnection");
 

@@ -18,7 +18,7 @@ files.forEach((e,i)=>{
 })
 //TODD: connect to local database
 mongoose.connect(
-    "mongodb://localhost:27017/balapp",
+    "mongodb://127.0.0.1:27017/balapp",
     // "mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false",
     {useNewUrlParser: true, useUnifiedTopology: true},
     (err) => {

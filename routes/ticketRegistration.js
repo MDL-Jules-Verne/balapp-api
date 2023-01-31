@@ -28,6 +28,8 @@ router.post("/enterTicket", async (req,res) =>{
         "nom": req.body.nom.toLowerCase(),
         "prenom": req.body.prenom.toLowerCase(),
         "externe": req.body.externe,
+        "classe": req.body.classe,
+        "niveau": req.body.niveau,
         "whoEntered": req.body.whoEntered.toLowerCase(),
         "timestamps.registered": Date.now()
     })

@@ -1,6 +1,7 @@
-node_modules/
+/node_modules/
 .idea/vcs.xml
 node_modules/.package-lock.json
 .idea/
+.idea - Copie/
 balapp-tickets/.idea/
 balapp-tickets/poppler-22.12.0

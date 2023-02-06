@@ -69,6 +69,6 @@ const interval = setInterval(() => {
         socket.isAlive = false
         socket.send("testConnection");
     })
-}, process.env.DELAY);
+}, process.env.DELAY || 1000);
 
 server.listen(2000)

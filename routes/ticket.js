@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const ticket = require('../models/ticket')
+const wss = require("../index");
 
 router.post("/editEnterStatus", async (req, res) => {
     if (!req.body) return res.status(400).send("Body of request is necessary")
@@ -12,6 +13,9 @@ router.post("/editEnterStatus", async (req, res) => {
     if (!status.matchedCount || status.matchedCount === 0) {
         return res.status(404).send("Ticket not found")
     }
+    wss.clients.forEach((socket) => {
+        socket.send({"messageType": "sync", "fullTicket": req.body})
+    })
     res.sendStatus(200)
 })
 

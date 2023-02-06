@@ -1,9 +1,10 @@
 const router = require('express').Router()
 const ticket = require('../models/ticket')
+const {sendToAll} = require("../index");
 router.get("/ticketInfo/:id", async (req, res) => {
     try {
         if (typeof req.params.id !== "string" || req.params.id.length !== 4){
-            return res.status(400).send({success: false, res: "Invalid QRcode"});
+            return res.status(400).send ({success: false, res: "Invalid QRcode"});
 
         }
         let verify;
@@ -34,7 +35,6 @@ router.post("/enterTicket", async (req,res) =>{
         "timestamps.registered": Date.now()
     })
 
-    console.log(status)
     if(!status.matchedCount || status.matchedCount === 0) {
         return res.status(404).send("Ticket not found")
     }
@@ -42,6 +42,7 @@ router.post("/enterTicket", async (req,res) =>{
         return res.status(500).send("Ticket non modifié")
     }
     res.sendStatus(200);
+    sendToAll(JSON.stringify({"messageType": "sync", "fullTicket": req.body}))
 })
 
 module.exports = router

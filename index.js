@@ -6,11 +6,20 @@ const ticket = require('./models/ticket')
 let files =  fs.readdirSync("routes")
 let server = require('http').createServer()
 let WSServer = require('ws').Server
+let wss = new WSServer({
+    server: server
+})
+module.exports = {sendToAll: function (message) {
+        wss.clients.forEach((e) => {
+            e.send(message)
+        })
+    }
+};
 app.use(express.json());
 
 // activate all routes from /routes
 app.use((req,res, next)=>{
-    console.log(req.path)
+    // console.log(req.path)
     next()
 })
 files.forEach((e,i)=>{
@@ -29,30 +38,36 @@ mongoose.connect(
     }
 );
 //mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false
-let wss = new WSServer({
-    server: server
-})
-const mode = "bal"
+
+const mode = "buy"
 server.on("request", app)
 wss.on("connection", (socket)=>{
     console.log(`connected:`);
     socket.on("message", async (message)=>{
         let msg = message.toString();
+        // console.log(msg);
         if(msg === "hello") {
             socket.send(JSON.stringify({mode, db: await ticket.find()}))
         }
         if(msg === "testConnection"){
             socket.isAlive = true;
         }
+        try{
+            msg = JSON.parse(msg)
+        } catch (e) {
+            
+        }
+        if(msg?.messageType === "updateReceived"){
+            console.log(msg.ticket)
+        }
     })
 })
 const interval = setInterval(() => {
     console.log(wss.clients.size)
     wss.clients.forEach((socket) => {
-        if(socket.isAlive === false && process.env.PROD === true) socket.terminate()
+        if(socket.isAlive === false) socket.terminate()
         socket.isAlive = false
         socket.send("testConnection");
-
     })
 }, process.env.DELAY);
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "SET DELAY=1000 && SET PROD=true && node index.js",
-    "dev": "SET DELAY=10000 && SET PROD=false && nodemon index.js"
+    "dev": "SET DELAY=15000 && SET PROD=false && nodemon index.js"
   },
   "author": "",
   "license": "ISC",

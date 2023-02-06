@@ -13,7 +13,7 @@ router.post("/editEnterStatus", async (req, res) => {
     if (!status.matchedCount || status.matchedCount === 0) {
         return res.status(404).send("Ticket not found")
     }
-    sendToAll({"messageType": "sync", "fullTicket": req.body})
+    sendToAll(JSON.stringify({"messageType": "sync", "fullTicket": req.body}))
     res.sendStatus(200)
 })
 

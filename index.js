@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose')
 const fs = require('fs')
+const cors = require('cors')
 const ticket = require('./models/ticket')
 let files =  fs.readdirSync("routes")
 let server = require('http').createServer()
@@ -9,9 +10,15 @@ let WSServer = require('ws').Server
 let wss = new WSServer({
     server: server
 })
+app.use(cors())
+process.ipToName = {}
 module.exports = {sendToAll: function (message) {
         wss.clients.forEach((e) => {
             e.send(message)
+        })
+    }, sendToDashboard: function (message){
+        wss.clients.forEach((e) => {
+            if(e.name === "dashboard") e.send(message)
         })
     }
 };
@@ -19,7 +26,7 @@ app.use(express.json());
 
 // activate all routes from /routes
 app.use((req,res, next)=>{
-    // console.log(req.path)
+    console.log(req.ip)
     next()
 })
 files.forEach((e,i)=>{
@@ -41,16 +48,39 @@ mongoose.connect(
 
 const mode = "buy"
 server.on("request", app)
-wss.on("connection", (socket)=>{
-    console.log(`connected:`);
+let dashboardSocket;
+wss.on("connection", (socket, req)=>{
+    console.log(req.socket.remoteAddress);
+    socket.on("close", ()=>{
+        let allSocketsList = []
+        wss.clients.forEach(e=>{
+            if(e.name !== "dashboard") allSocketsList.push(e.name)
+        })
+        dashboardSocket?.send(JSON.stringify({"messageType": "disconnect","scannerName": socket.name, "allSockets": allSocketsList}))
+    })
     socket.on("message", async (message)=>{
         let msg = message.toString();
         // console.log(msg);
+
+        if(msg === "dashboardConnect"){
+            socket.name = "dashboard"
+            dashboardSocket = socket;
+        }
         if(msg === "hello") {
             socket.send(JSON.stringify({mode, db: await ticket.find()}))
         }
+        if(msg.startsWith("name")){
+            process.ipToName[req.socket.remoteAddress] = msg.slice(4)
+            socket.name = msg.slice(4)
+        }
         if(msg === "testConnection"){
-            socket.isAlive = true;
+            socket.isAlive = 1;
+
+            let allSocketsList = []
+            wss.clients.forEach(e=>{
+                if(e.name !== "dashboard") allSocketsList.push(e.name)
+            })
+            dashboardSocket?.send(JSON.stringify({"messageType": "heartbeat", "scannerName": socket.name, "allSockets": allSocketsList}));
         }
         try{
             msg = JSON.parse(msg)
@@ -65,9 +95,12 @@ wss.on("connection", (socket)=>{
 const interval = setInterval(() => {
     console.log(wss.clients.size)
     wss.clients.forEach((socket) => {
-        if(socket.isAlive === false) socket.terminate()
-        socket.isAlive = false
-        socket.send("testConnection");
+        if(socket.name === "dashboard") return;
+        socket.send("testConnection")
+        // console.log(socket.isAlive);
+        if(socket.isAlive === 4) socket.terminate()
+        if(!socket.isAlive) socket.isAlive = 1
+        socket.isAlive += 1;
     })
 }, process.env.DELAY || 1000);
 

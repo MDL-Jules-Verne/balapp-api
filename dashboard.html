@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link href="inter.css" rel="stylesheet">
+
+    <script>
+        const heartbeatBar = `<div class="w-full">
+            <h3>§§scannerName§§</h3>
+            <div style="width: §§heartBeatPercent§§%; background-color: #7172e3" class="h-5"></div>
+        </div>`
+
+        function generateProgressBar(scannerName, delay) {
+            let returnValue = heartbeatBar.replace("§§heartBeatPercent§§", ((delay / 4000 * 96) + 4).toString())
+            return returnValue.replace("§§scannerName§§", scannerName)
+        }
+
+        function updateSocketArray(message) {
+            allSocketsList = allSocketsList.filter(e => {
+                return message.allSockets.some(ee => ee === e.name)
+            })
+            eventLogDOM.filter(e=>{
+                return message.allSockets.some(ee => ee === e.name)
+            })
+            allSocketsList.forEach(e => {
+                if (!eventLog[e.name]) eventLog[e.name] = []
+                if (!eventLogDOM[e.name]) {
+                    eventLogDOM[e.name] = eventLogDiv.appendChild(document.createElement("div"))
+                    eventLogDOM[e.name].innerHTML = `<div class='drop-shadow-xl mr-3 p-3 rounded-lg' style='background-color: #7172e3 '><div class='text-2xl pb-4 border-b border-white'>${e.name}</div></div>`
+                }
+            })
+        }
+
+        function syncTicket(){
+            fetch("http://localhost:2000/syncTicket/" + document.getElementById("updateTicket").value).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                console.log(data);
+            }).catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+        }
+
+    </script>
+
+</head>
+<body class="flex px-10 pt-8 pb-24 w-screen h-screen" style="background-color: #17171a; color: #fdfdfd">
+<div class="w-5/12 flex flex-col justify-between">
+    <div class="rounded-lg drop-shadow-md p-5" style="background-color: #1b1b27">
+        <div class="text-4xl">Heart Beats</div>
+        <div id="heartBeat" class="p-5">
+        </div>
+    </div>
+    <div class="h-1/4 mt-6 p-5 rounded-lg drop-shadow-md" style="background-color: #1b1b27">
+        <div class="text-4xl mb-4">Actions</div>
+        <input type="text" class="p-2 rounded-md" id="updateTicket" maxlength="4"  size="4" style="color: #000; ">
+        <button class="button ml-4" onclick="syncTicket();">Sync ticket</button>
+    </div>
+</div>
+<div class="w-14"></div>
+<div class="w-full p-5  rounded-lg drop-shadow-md" style="background-color: #1b1b27">
+    <div class="text-4xl">Event log</div>
+    <div class="h-6"></div>
+    <div id="eventLog" class="flex"></div>
+</div>
+</body>
+<script>
+    let eventLog = {}
+    let allSocketsList = []
+    let eventLogDOM = []
+    const eventLogDiv = document.getElementById("eventLog")
+    let ws = new WebSocket("ws://localhost:2000");
+    ws.onopen = () => {
+        ws.send("dashboardConnect");
+    }
+
+
+    ws.onmessage = (msg) => {
+        let message = JSON.parse(msg.data)
+        if (message.messageType === "heartbeat") {
+            updateSocketArray(message)
+            let index = allSocketsList.findIndex(e => e.name === message.scannerName);
+            if (index === -1) {
+                allSocketsList.push({timestamp: Date.now(), name: message.scannerName});
+                return;
+            }
+            allSocketsList[allSocketsList.findIndex(e => e.name === message.scannerName)].timestamp = Date.now()
+        } else if (message.messageType === "disconnect") {
+            updateSocketArray(message)
+        } else if (message.messageType === "sync") {
+            console.log(message)
+            eventLog[message.scannerName].push(message.from + message.fullTicket.id)
+            eventLogDOM[message.scannerName].innerHTML = eventLogDOM[message.scannerName].innerHTML.substring(0, eventLogDOM[message.scannerName].innerHTML.length - 6)
+            eventLogDOM[message.scannerName].innerHTML = eventLogDOM[message.scannerName].innerHTML.substring(0, eventLogDOM[message.scannerName].innerHTML.length - 6) +
+                "<br>" + message.fullTicket.id + ": " + message.from + "</div>"
+            console.log(eventLogDOM[message.scannerName].innerHTML)
+        }
+    }
+    heartBeatDiv = document.getElementById("heartBeat")
+    setInterval(() => {
+        let fullHtml = ""
+        allSocketsList.forEach((e, i) => {
+            fullHtml += generateProgressBar(e.name, Date.now() - e.timestamp)
+        })
+        heartBeatDiv.innerHTML = fullHtml;
+    }, 25);
+</script>
+<script src="tailwind.js"></script>
+</html>

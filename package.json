@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "SET DELAY=1000 && SET PROD=true && node index.js",
-    "dev": "SET DELAY=15000 && SET PROD=false && nodemon index.js"
+    "dev": "SET DELAY=2000 && SET PROD=false && nodemon index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.1",
     "mongoose": "^6.9.0",
     "nodemon": "^2.0.20",

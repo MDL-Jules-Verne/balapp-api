@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const ticket = require('../models/ticket')
-const { sendToAll} = require("../index");
+const {sendToAll,} = require("../index");
 
 router.post("/editEnterStatus", async (req, res) => {
     if (!req.body) return res.status(400).send("Body of request is necessary")
@@ -14,7 +14,12 @@ router.post("/editEnterStatus", async (req, res) => {
         return res.status(404).send("Ticket not found")
     }
     res.sendStatus(200)
-    sendToAll(JSON.stringify({"messageType": "sync", "fullTicket": await ticket.findOne({id: req.body.id})}))
+    sendToAll(JSON.stringify({
+        "messageType": "sync",
+        "scannerName": !req.body.scannerName ? process.ipToName[req.ip] : req.body.scannerName,
+        "from": req.body.setEnter ? "Entered" : "UNentered",
+        "fullTicket": await ticket.findOne({id: req.body.id})
+    }))
 })
 
 module.exports = router;

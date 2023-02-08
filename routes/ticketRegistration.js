@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const ticket = require('../models/ticket')
-const {sendToAll} = require("../index");
+const {sendToAll, sendToDashboard} = require("../index");
 router.get("/ticketInfo/:id", async (req, res) => {
     try {
         if (typeof req.params.id !== "string" || req.params.id.length !== 4){
@@ -19,7 +19,7 @@ router.get("/ticketInfo/:id", async (req, res) => {
         console.log(e)
         return res.status(400).send({success: false, res: "Unexpected Error"});
     }
-
+    sendToDashboard(JSON.stringify({messageType: "sync", from:"Scanned", scannerName: process.ipToName[req.ip], fullTicket:{id:req.params.id} }))
 })
 
 router.post("/enterTicket", async (req,res) =>{
@@ -42,7 +42,7 @@ router.post("/enterTicket", async (req,res) =>{
         return res.status(500).send("Ticket non modifié")
     }
     res.sendStatus(200);
-    sendToAll(JSON.stringify({"messageType": "sync", "fullTicket": req.body}))
+    sendToAll(JSON.stringify({"messageType": "sync", "scannerName": req.body.whoEntered, "from": "Registered", "fullTicket": req.body}))
 })
 
 module.exports = router

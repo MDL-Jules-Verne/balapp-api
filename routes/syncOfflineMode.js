@@ -3,7 +3,6 @@ const ticket = require('../models/ticket')
 const ticketConflict = require('../models/ticketConflict')
 router.post("/", async (req, res) => {
     if (!req.body) return res.status(400)
-    console.log(req.body);
     for (const ticket1 of req.body) {
         const ticketDb = await ticket.findOne({id: ticket1.id})
         if (ticketDb == null) {
@@ -13,7 +12,6 @@ router.post("/", async (req, res) => {
             })
             continue
         }
-        console.log(ticketDb, ticketDb.nom !== "", ticket1, ticket1.nom !== "")
         //TODO: laisser passer si c'est le même nom
         if (ticketDb.nom !== "" && ticket1.nom !== "") {
             await ticketConflict.create(

@@ -15,7 +15,6 @@ router.post("/initDb", async (req, res) => {
     }
     await ticket.deleteMany()
     await ticket.insertMany(ticketsToAdd);
-    console.log("initDb")
     res.sendStatus(200)
 })
 router.post("/addTickets", async (req, res) => {

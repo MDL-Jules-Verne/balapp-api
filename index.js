@@ -26,11 +26,19 @@ app.use(express.json());
 
 // activate all routes from /routes
 app.use((req,res, next)=>{
-    console.log(req.ip)
     next()
 })
 files.forEach((e,i)=>{
     app.use(`/${e.slice(0,e.length-3)}`, require(`./routes/${e}`))
+})
+app.get('/dashboard', async (req,res)=>{
+    res.send(fs.readFileSync("dashboard.html", {encoding:"utf-8"}))
+})
+app.get('/inter.css', async (req,res)=>{
+    res.setHeader("Content-Type", "text/css").send(fs.readFileSync("inter.css", {encoding:"utf-8"}))
+})
+app.get('/tailwind.js', async (req,res)=>{
+    res.send(fs.readFileSync("tailwind.js", {encoding:"utf-8"}))
 })
 //TODD: connect to local database
 mongoose.connect(
@@ -50,7 +58,6 @@ const mode = "buy"
 server.on("request", app)
 let dashboardSocket;
 wss.on("connection", (socket, req)=>{
-    console.log(req.socket.remoteAddress);
     socket.on("close", ()=>{
         let allSocketsList = []
         wss.clients.forEach(e=>{
@@ -88,20 +95,25 @@ wss.on("connection", (socket, req)=>{
             
         }
         if(msg?.messageType === "updateReceived"){
-            console.log(msg.ticket)
+            console.log("updateReceived: " + socket.name)
         }
     })
 })
+
 const interval = setInterval(() => {
-    console.log(wss.clients.size)
     wss.clients.forEach((socket) => {
         if(socket.name === "dashboard") return;
         socket.send("testConnection")
         // console.log(socket.isAlive);
-        if(socket.isAlive === 4) socket.terminate()
+        if(socket.isAlive === 4) {
+            console.log(socket.name+ ": TERMINATE CONNECTION")
+            socket.terminate()
+        }
         if(!socket.isAlive) socket.isAlive = 1
         socket.isAlive += 1;
     })
-}, process.env.DELAY || 1000);
+}, process.env.DELAY || 900);
 
-server.listen(2000)
+server.listen(2000, ()=>{
+    console.log("Connect to http://localhost:2000/dashboard to see dashboard")
+})

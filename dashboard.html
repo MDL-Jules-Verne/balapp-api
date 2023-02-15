@@ -41,6 +41,15 @@
                 console.log('Fetch Error :-S', err);
             });
         }
+        function resetTicket(){
+            fetch("http://localhost:2000/resetTicket/" + document.getElementById("updateTicket").value).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                console.log(data);
+            }).catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+        }
 
     </script>
 
@@ -56,6 +65,7 @@
         <div class="text-4xl mb-4">Actions</div>
         <input type="text" class="p-2 rounded-md" id="updateTicket" maxlength="4"  size="4" style="color: #000; ">
         <button class="button ml-4" onclick="syncTicket();">Sync ticket</button>
+        <button class="button ml-4" onclick="resetTicket();">Reset ticket</button>
     </div>
 </div>
 <div class="w-14"></div>

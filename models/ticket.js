@@ -16,6 +16,7 @@ const ticket = mongoose.mongoose.Schema({
         registered: Number,
         entered: Number,
         leave: Number,
-    }
+    },
+    hasTakenFreeDrink: Boolean,
 })
 module.exports = mongoose.model("ticket", ticket);

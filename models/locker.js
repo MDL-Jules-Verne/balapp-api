@@ -12,6 +12,11 @@ const locker = mongoose.mongoose.Schema({
         Sac:Number,
         Vetement: Number,
     },
+    /*holes: {
+        Relou:[Number],
+        Sac:[Number],
+        Vetement: [Number],
+    }*/
     /*"clothesAreas": [
         {
             "spotsUp": Number,

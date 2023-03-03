@@ -88,6 +88,7 @@
 
     ws.onmessage = (msg) => {
         let message = JSON.parse(msg.data)
+        console.log(message)
         if (message.messageType === "heartbeat") {
             updateSocketArray(message)
             let index = allSocketsList.findIndex(e => e.name === message.scannerName);
@@ -98,7 +99,7 @@
             allSocketsList[allSocketsList.findIndex(e => e.name === message.scannerName)].timestamp = Date.now()
         } else if (message.messageType === "disconnect") {
             updateSocketArray(message)
-        } else if (message.messageType === "sync") {
+        } else if (message.messageType === "sync" && message.from !== "Scanned") {
             console.log(message)
             eventLog[message.scannerName].push(message.from + message.fullTicket.id)
             eventLogDOM[message.scannerName].innerHTML = eventLogDOM[message.scannerName].innerHTML.substring(0, eventLogDOM[message.scannerName].innerHTML.length - 6)

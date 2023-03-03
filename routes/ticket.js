@@ -8,7 +8,9 @@ router.post("/editEnterStatus", async (req, res) => {
     let status = await ticket.updateOne({id: req.body.id}, {
         hasEntered: req.body.setEnter,
         whoScanned: req.body.scannerName,
-        'timestamps.entered': Date.now()
+        'timestamps.entered': Date.now(),
+        nom: req.body.nom,
+        prenom: req.body.prenom,
     })
     if (!status.matchedCount || status.matchedCount === 0) {
         return res.status(404).send("Ticket not found")

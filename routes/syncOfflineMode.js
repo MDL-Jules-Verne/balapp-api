@@ -12,8 +12,8 @@ router.post("/", async (req, res) => {
             })
             continue
         }
-        //TODO: laisser passer si c'est le même nom
-        if (ticketDb.nom !== "" && ticket1.nom !== "") {
+
+        if ((ticketDb.nom !== "" && ticket1.nom !== "") && (ticketDb.nom !== ticket1.nom || ticketDb.prenom !== ticket1.prenom)) {
             await ticketConflict.create(
                 {
                     ticket: ticketDb,

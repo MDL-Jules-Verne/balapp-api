@@ -19,6 +19,7 @@ Lancer le serveur (npm start)
 Récupérer l'IP locale du PC avec la commande ipconfig
 
 L'application va demander une IP, y mettre l'ip locale du pc plus ":2000" à la fin
+
 Il n'y a plus qu'à scanner !
 
 ## Le jour du bal

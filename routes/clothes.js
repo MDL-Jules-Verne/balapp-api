@@ -4,69 +4,31 @@ const locker = require('../models/locker')
 const {sendToAll} = require("../index");
 router.post("/add", async (req, res) => {
     let lockers = await locker.find()
-    lockers = lockers.filter(e=>e.remainingSpace[req.body.clothType] > 0)
-    console.log(req.body.forceLockerNumber)
-    let max;
-    /*let max = lockers.reduce((prev, current) => (prev.remainingSpace[req.body.clothType] > current.remainingSpace[req.body.clothType]) ? prev : current);
-    if (max.remainingSpace[req.body.clothType] <= 0) {
-        lockers = await locker.find({idNumber: {$in: req.body.forceLockerNumber.map(e => e + 4)}})
-        max = lockers.reduce((prev, current) => (prev.remainingSpace[req.body.clothType] > current.remainingSpace[req.body.clothType]) ? prev : current);
-        if (max.remainingSpace[req.body.clothType] <= 0)
-            return res.status(400).send("Plus d'espace")
-    }*/
-    if(req.body.clothType === "Vetement"){
-        max = lockers.filter(e=>req.body.forceLockerNumber.includes(e.idNumber))
-        console.log(max)
-        if(max.length === 0){
-            max = lockers.filter(e=>req.body.forceLockerNumber.includes(e.idNumber-4))
-        }
-    } else if(req.body.clothType === "Relou"){
-        max = lockers.filter(e=>req.body.forceLockerNumber.includes(e.idNumber))
-    } else if(req.body.clothType === "Sac"){
-        max = [lockers.find(e=>e.idNumber === 4)]
-        if(max[0] === undefined){
-            max = lockers.filter(e=>[5,6,7].includes(e.idNumber));
-            if(max.length === 0){
-                max = lockers.filter(e=>[1,2,3].includes(e.idNumber));
-            }
-        }
+    lockers = lockers.filter(e=>e.closed[req.body.clothType] === false)
+    let preferredLockers = lockers.filter(e=>req.body.forceLockerNumber.includes(e.idNumber))
+    let selectedLocker;
+    if(preferredLockers.length > 0){
+        selectedLocker = preferredLockers[0]
+    } else {
+        selectedLocker = lockers[0]
     }
-    if(max.length === 0) return res.status(400).send("Plus d'espace");
-    else max = max[0]
+    let updateObject = {usedSpace :{}}
+    updateObject["usedSpace"][req.body.clothType] = 1
 
-    let updateObject = {}
-    updateObject["remainingSpace." + req.body.clothType] = -1
-    const ticket1 = await ticket.findOne({id: req.body.id})
-    let place = max.totalSpace[req.body.clothType] + 1 - max.remainingSpace[req.body.clothType]
-    let idNumber = max.idNumber
-
-    if (req.body.clothType !== "Sac") {
-        let sameTypeClothes = ticket1.clothes.filter(e => e.clothType === req.body.clothType)
-        if (sameTypeClothes.length > 0) {
-            idNumber = sameTypeClothes[0].idNumber;
-            place = sameTypeClothes[0].place;
-            updateObject["remainingSpace." + req.body.clothType] = 0
-        }
-    }
-    /*let removeHoles
-    if(max.holes[req.body.clothType].length > 0) {
-
-    }*/
-
-    await locker.updateOne({_id: max._id}, {$inc: updateObject})
+    await locker.updateOne({_id: selectedLocker._id}, {$inc: updateObject})
     await ticket.updateOne({id: req.body.id}, {
         $push: {
             clothes: {
                 clothType: req.body.clothType,
-                idNumber: idNumber,
-                place: place
+                idNumber: selectedLocker.idNumber,
+                place: selectedLocker.usedSpace[req.body.clothType]+1
             }
         }
     })
     let cloth = {
         clothType: req.body.clothType,
-        idNumber: idNumber,
-        place: place
+        idNumber: selectedLocker.idNumber,
+        place: selectedLocker.usedSpace[req.body.clothType]+1
     }
     res.send(cloth)
     sendToAll(JSON.stringify({
@@ -108,6 +70,12 @@ router.post("/remove", async (req, res) => {
 
 router.post("/setLastRemove", async (req, res) => {
     await ticket.updateOne({id: req.body.id}, {"timestamps.leave": Date.now()})
+})
+router.get("/closeLocker/:lockerId/:clothType", async (req,res ) => {
+    let locker1= await locker.findOne({idNumber:req.query.idNumber})
+    let updateObject = {closed :{}}
+    updateObject.closed[req.body.clothType] = !locker1.closed[req.body.clothType]
+    await locker.updateOne({idNumber:req.params.idNumber}, updateObject)
 })
 router.get("/lockersList", async (req, res) => {
     res.send((await locker.find({idNumber: {$lte: 3}})).map(e => 'Vestiaire ' + e.idNumber))

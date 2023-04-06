@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "SET DELAY=900 && SET PROD=true && node index.js",
+    "buy": "SET DELAY=900 && SET PROD=true && SET MODE=buy && node index.js",
+    "bal": "SET DELAY=900 && SET PROD=true && SET MODE=bal && node index.js",
     "dev": "SET DELAY=15000 && SET PROD=false && nodemon index.js"
   },
   "author": "",

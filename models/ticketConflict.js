@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const ticket = mongoose.Schema({
     ticket: {
         id:String,
-        salle: String,
-        couleur: String,
         classe: Number,
         niveau: String,
         prenom: String,
@@ -17,12 +15,17 @@ const ticket = mongoose.Schema({
             registered: Number,
             entered: Number,
             leave: Number,
-        }
+        },
+        hasTakenFreeDrink: Boolean,
+        clothes: [{
+            clothType: String,
+            idNumber: Number,
+
+            place: Number
+        }],
     },
     newTicket:{
         id:String,
-        salle: String,
-        couleur: String,
         classe: Number,
         niveau: String,
         prenom: String,
@@ -35,7 +38,14 @@ const ticket = mongoose.Schema({
             registered: Number,
             entered: Number,
             leave: Number,
-        }
+        },
+        hasTakenFreeDrink: Boolean,
+        clothes: [{
+            clothType: String,
+            idNumber: Number,
+
+            place: Number
+        }],
     }
 })
 module.exports = mongoose.model("ticketConflict", ticket);

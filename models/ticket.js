@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 
 const ticket = mongoose.mongoose.Schema({
     id:String,
-    salle: String,
-    couleur: String,
     classe: Number,
     niveau: String,
     prenom: String,

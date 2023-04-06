@@ -1,3 +1,5 @@
+import os
+
 import pymongo
 from qrcode.image.styledpil import StyledPilImage
 import qrcode.image.svg
@@ -5,25 +7,14 @@ import random
 import time
 from PIL import Image, ImageDraw, ImageFont
 from tqdm import tqdm
-
+import sys
+from verifyGroupTickets import verify_group_tickets
+from verifyTickets import verify_tickets
+from groupTicketsByPage import group_tickets
 chars = "RTPQSDFGHJKLWXCVB3456789"
-colorsFrench = ["violet", "bleu", "vert", "jaune", "orange", "rose"]
-salles = ["A", "B", "C", "D", "E", "F"]
-ticketsByRoom = {}
-for i in salles:
-    ticketsByRoom[i] = {}
-    for ii in colorsFrench:
-        if i == "A" or i == "B" or i == "C":
-            if ii == "rose":
-                continue
-            ticketsByRoom[i][ii] = 16 if ii == 'violet' else 17
-        elif i == "D" or i == "E":
-            ticketsByRoom[i][ii] = 13 if ii == 'violet' or ii == 'bleu' else 14
-        else:
-            ticketsByRoom[i][ii] = 14
-idLength = 4
 inter = ImageFont.truetype('Inter-Bold.ttf', 35)
-
+idLength = 4
+nb_of_tickets = 500
 
 def get_random_string(size):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -31,13 +22,28 @@ def get_random_string(size):
 
 usedIds = []
 fullDb = []
-colorNb = 0
-roomNb = 0
-execStart = time.time()
+useProvidedUri = False
+if len(sys.argv) < 2:
+    print("Please provide a number of tickets. Syntax: 'python main.py <nb of tickets> [mongoDB host]'")
+    exit(1)
+if len(sys.argv) < 3:
+    print("Using localhost and default port for mongo... \nSyntax: 'python main.py <nb of tickets> [mongoDB host]'")
+    sys.argv.append("mongodb://localhost:27017")
 
-for i in tqdm(range(1, 501), desc="Creating Tickets", ncols=120):
+client = pymongo.MongoClient(
+    sys.argv[2],
+    serverSelectionTimeoutMS=5000, connect=True)
+# Test connection to server
+try:
+    client.server_info()
+except pymongo.errors.ServerSelectionTimeoutError:
+    print("MongoDB server cannot be reached at " + sys.argv[2])
+    exit(1)
+
+if not os.path.exists("../generated_qrs"):
+    os.mkdir("../generated_qrs")
+for i in tqdm(range(1, nb_of_tickets+1), desc="Creating Tickets", ncols=120):
     ticketData = {}
-    data = get_random_string(idLength)
     qr = qrcode.QRCode(
         version=1,
         border=1,
@@ -53,51 +59,24 @@ for i in tqdm(range(1, 501), desc="Creating Tickets", ncols=120):
 
     # Make image
     img = qr.make_image(image_factory=StyledPilImage)
-    ticket = Image.open(f"./Frame 56.png")
+    ticket = Image.open(f"./Ticket.png")
     ticket.paste(img, (1324, 57))
     I1 = ImageDraw.Draw(ticket)
-    _, _, w, h = I1.textbbox((0, 0), f"#{data}  -  {colorsFrench[colorNb]}  -  {roomNb}", font=inter)
-    # I1.text((1359 - 9, 428), f"#{data} - {colorsFrench[colorNb]} - {roomNb}", fill=(0, 0, 0), font=inter)
-    I1.text((1510 - w / 2, 425), f"#{data}  -  {colorsFrench[colorNb]}  -  {salles[roomNb]}", fill=(0, 0, 0),
-            font=inter)
-
-    ticketData["couleur"] = colorsFrench[colorNb]
-    ticketData["salle"] = salles[roomNb]
+    _, _, w, h = I1.textbbox((0, 0), f"#{data}", font=inter)
+    I1.text((1510 - w / 2, 425), f"#{data}", fill=(0, 0, 0), font=inter)
     ticketData["id"] = data
-
-    ticket.save(f"../../generated_qrs/{ticketData['id']}.png")
+    ticket.save(f"../generated_qrs/{ticketData['id']}.png")
     fullDb.append(ticketData)
-    ticketsByRoom[salles[roomNb]][colorsFrench[colorNb]] -= 1
-    if ticketsByRoom[salles[roomNb]][colorsFrench[colorNb]] <= 0:
-        colorNb += 1
-        if colorNb == 5 and roomNb < 3:
-            colorNb = 0
-            roomNb += 1
-        elif colorNb >= 6:
-            colorNb = 0
-            roomNb += 1
-    # colorNb += 1
-    # if (roomNb == 0 or roomNb == 1 or roomNb == 2) and colorNb >= len(colorsFrench) - 1:
-    #     colorNb += 1
-    # if colorNb >= len(colorsFrench):
-    #     colorNb = 0
-    #     roomNb += 1
-    #     if roomNb >= 6:
-    #         roomNb = 0
+
 random.shuffle(fullDb)
 print("Saving tickets...")
 
-client = pymongo.MongoClient(
-    "mongodb://localhost:27017/balapp",
-    serverSelectionTimeoutMS=5000)
 client = client["balapp"]
 
 newTickets = []
 for i in fullDb:
     newTickets.append({
         "id": i["id"],
-        "salle": i["salle"],
-        "couleur": i["couleur"],
         "prenom": "",
         "nom": "",
         "externe": False,
@@ -121,8 +100,9 @@ client["oldtickets"].insert_one({
 })
 client["tickets"].delete_many({})
 client["tickets"].insert_many(newTickets)
-# with open("../db/db.csv", 'w', newline='') as csvfile:
-#     writer = csv.DictWriter(csvfile, fieldnames=["salle", "couleur", "prenom", "hasEntered", "nom", "registeredTimestamp", "enteredTimestamp", "leaveTimestamp", "externe", "id", "whoEntered"])
-#     writer.writeheader()
-#     for key in fullDb:
-#         writer.writerow(key)
+
+verify_tickets()
+group_tickets()
+print("Please ensure Pypdfium2 is >=2.1 and <3")
+verify_group_tickets()
+

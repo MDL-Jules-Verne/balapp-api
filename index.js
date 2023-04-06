@@ -41,6 +41,7 @@ app.get('/tailwind.js', async (req,res)=>{
     res.send(fs.readFileSync("tailwind.js", {encoding:"utf-8"}))
 })
 //TODD: connect to local database
+mongoose.set('strictQuery', false);
 mongoose.connect(
     "mongodb://127.0.0.1:27017/balapp",
     // "mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false",
@@ -49,7 +50,6 @@ mongoose.connect(
         if (err) {
             return console.log(err);
         }
-        console.log("Connected to database");
     }
 );
 //mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false
@@ -115,5 +115,23 @@ const interval = setInterval(() => {
 }, process.env.DELAY || 900);
 
 server.listen(2000, ()=>{
-    console.log("Connect to http://localhost:2000/dashboard to see dashboard")
+    let os = require('os');
+    let nets = os.networkInterfaces();
+    const results = {}
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+            // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+            const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
+            if (net.family === familyV4Value && !net.internal) {
+                if (!results[name]) {
+                    results[name] = [];
+                }
+                results[name].push(net.address+":2000");
+            }
+        }
+    }
+    console.log("Une des IP ci dessous fonctionnera pour l'application:")
+    console.log(results)
+    console.log("\nDashboard at http://localhost:2000/dashboard")
 })

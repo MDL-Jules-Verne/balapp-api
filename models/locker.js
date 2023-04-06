@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
 const locker = mongoose.mongoose.Schema({
-    "idNumber": Number,
-    "remainingSpace": {
-        Relou:Number,
-        Sac:Number,
+    idNumber: Number,
+    usedSpace: {
+        Relou: Number,
+        Sac: Number,
         Vetement: Number,
     },
-    "totalSpace": {
-        Relou:Number,
-        Sac:Number,
-        Vetement: Number,
-    },
+    closed: {
+        Relou: Boolean,
+        Sac: Boolean,
+        Vetement: Boolean,
+    }
     /*holes: {
         Relou:[Number],
         Sac:[Number],

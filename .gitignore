@@ -5,3 +5,4 @@ node_modules/.package-lock.json
 .idea - Copie/
 balapp-tickets/.idea/
 balapp-tickets/poppler-22.12.0
+generated_qrs/*

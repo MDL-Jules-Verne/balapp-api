@@ -1,4 +1,5 @@
 # Vestiaires
+Pour toutes commandes, ajouter `--mongo <Mongo instance url>` pour spécifier une addresse autre que `mongodb://localhost:27017` pour la base de données. 
 ### Lister les zones
 `python balapp-tickets/vestiaires.py list`
 

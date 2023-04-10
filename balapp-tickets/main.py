@@ -8,6 +8,7 @@ import time
 from PIL import Image, ImageDraw, ImageFont
 from tqdm import tqdm
 import sys
+
 from verifyGroupTickets import verify_group_tickets
 from verifyTickets import verify_tickets
 from groupTicketsByPage import group_tickets
@@ -103,6 +104,5 @@ client["tickets"].insert_many(newTickets)
 
 verify_tickets()
 group_tickets()
-print("Please ensure Pypdfium2 is >=2.1 and <3")
 verify_group_tickets()
 

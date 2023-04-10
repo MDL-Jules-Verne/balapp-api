@@ -21,7 +21,7 @@ Vous êtes prêts à passer à l'enregistrement des billets
 Il n'y a plus qu'à scanner !
 
 ### Le jour du bal
-1. Renseigner les différentes zones de vestiaires (voir [Vestiaires](https://github.com/MDL-Jules-Verne/balapp-api/blob/main/DASHBOARD.md))
+1. Renseigner les différentes zones de vestiaires (voir [Vestiaires](https://github.com/MDL-Jules-Verne/balapp-api/blob/main/VESTIAIRES.md))
 2. Connecter les téléphones munis de l'application au même réseau que le PC
 3. Lancer le serveur avec `npm run bal` une IP apparaît
 4. L'application va demander une IP, y mettre l'IP donnée par `npm run bal` (s'il y en a plusieurs, les essayer toutes jusqu'à en trouver une qui fonctionne)

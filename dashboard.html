@@ -51,17 +51,6 @@
             });
         }
 
-        function closeLocker(){
-            let lockerId = prompt("Locker ID number")
-            let clothType = prompt("Cloth type (Sac/Vetement)")
-            fetch(`http://localhost:2000/clothes/closeLocker/${lockerId}/${clothType}`).then(function(response) {
-                return response.json();
-            }).then(function(data) {
-                console.log(data);
-            }).catch(function(err) {
-                console.log('Fetch Error :-S', err);
-            });
-        }
 
     </script>
 
@@ -78,7 +67,6 @@
         <input type="text" class="p-2 rounded-md" id="updateTicket" maxlength="4"  size="4" style="color: #000; ">
         <button class="button ml-4" onclick="syncTicket();">Sync ticket</button>
         <button class="button ml-4" onclick="resetTicket();">Reset ticket</button>
-        <button class="button ml-4" onclick="closeLocker();">Close locker</button>
     </div>
 </div>
 <div class="w-14"></div>

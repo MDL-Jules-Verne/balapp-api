@@ -72,12 +72,6 @@ router.post("/remove", async (req, res) => {
 router.post("/setLastRemove", async (req, res) => {
     await ticket.updateOne({id: req.body.id}, {"timestamps.leave": Date.now()})
 })
-router.get("/closeLocker/:lockerId/:clothType", async (req, res) => {
-    let locker1 = await locker.findOne({idNumber: req.query.idNumber})
-    let updateObject = {closed: {}}
-    updateObject.closed[req.body.clothType] = !locker1.closed[req.body.clothType]
-    await locker.updateOne({idNumber: req.params.idNumber}, updateObject)
-})
 router.get("/lockersList", async (req, res) => {
 
     res.send((await locker.find()).map(e => {

@@ -4,16 +4,16 @@ const locker = require('../models/locker')
 const {sendToAll} = require("../index");
 router.post("/add", async (req, res) => {
     let lockers = await locker.find()
-    lockers = lockers.filter(e=>e.closed[req.body.clothType] === false)
-    let preferredLockers = lockers.filter(e=>req.body.forceLockerNumber.includes(e.idNumber))
+    lockers = lockers.filter(e => e.closed[req.body.clothType] === false)
+    let preferredLockers = lockers.filter(e => req.body.forceLockerNumber.includes(e.idNumber))
     let selectedLocker;
-    if(preferredLockers.length > 0){
+    if (preferredLockers.length > 0) {
         selectedLocker = preferredLockers[0]
     } else {
         selectedLocker = lockers[0]
     }
-    let updateObject = {usedSpace :{}}
-    updateObject["usedSpace"][req.body.clothType] = 1
+    let updateObject = {}
+    updateObject["usedSpace." + req.body.clothType] = 1
 
     await locker.updateOne({_id: selectedLocker._id}, {$inc: updateObject})
     await ticket.updateOne({id: req.body.id}, {
@@ -21,14 +21,14 @@ router.post("/add", async (req, res) => {
             clothes: {
                 clothType: req.body.clothType,
                 idNumber: selectedLocker.idNumber,
-                place: selectedLocker.usedSpace[req.body.clothType]+1
+                place: selectedLocker.usedSpace[req.body.clothType] + 1
             }
         }
     })
     let cloth = {
         clothType: req.body.clothType,
         idNumber: selectedLocker.idNumber,
-        place: selectedLocker.usedSpace[req.body.clothType]+1
+        place: selectedLocker.usedSpace[req.body.clothType] + 1
     }
     res.send(cloth)
     sendToAll(JSON.stringify({
@@ -63,6 +63,7 @@ router.post("/remove", async (req, res) => {
     sendToAll(JSON.stringify({
         "messageType": "sync",
         "scannerName": process.ipToName[req.ip],
+        /*TODO: edit this*/
         "from": `REMOVED: ${cloth.idNumber > 4 ? cloth.idNumber % 4 : cloth.idNumber}${cloth.clothType === "Relou" ? "R" : cloth.idNumber <= 4 ? "A" : "B"}${cloth.place < 10 ? "0" : ""}${cloth.place}`,
         "fullTicket": await ticket.findOne({id: req.body.id})
     }))
@@ -71,13 +72,45 @@ router.post("/remove", async (req, res) => {
 router.post("/setLastRemove", async (req, res) => {
     await ticket.updateOne({id: req.body.id}, {"timestamps.leave": Date.now()})
 })
-router.get("/closeLocker/:lockerId/:clothType", async (req,res ) => {
-    let locker1= await locker.findOne({idNumber:req.query.idNumber})
-    let updateObject = {closed :{}}
+router.get("/closeLocker/:lockerId/:clothType", async (req, res) => {
+    let locker1 = await locker.findOne({idNumber: req.query.idNumber})
+    let updateObject = {closed: {}}
     updateObject.closed[req.body.clothType] = !locker1.closed[req.body.clothType]
-    await locker.updateOne({idNumber:req.params.idNumber}, updateObject)
+    await locker.updateOne({idNumber: req.params.idNumber}, updateObject)
 })
 router.get("/lockersList", async (req, res) => {
-    res.send((await locker.find({idNumber: {$lte: 3}})).map(e => 'Vestiaire ' + e.idNumber))
+
+    res.send((await locker.find()).map(e => {
+        return {
+            "displayName": 'Vestiaire ' + e.idNumber, "checked": false
+        }
+    }))
+})
+router.get("/lockersListFull", async (req, res) => {
+    res.send((await locker.find()).map(e => {
+        let locker1 = []
+        for (const clothType of ["Vetement", "Sac", "Relou"])
+            if (e.usedSpace[clothType] !== 0 || !e.closed[clothType]) locker1.push({
+                displayName: 'Vestiaire ' + e.idNumber + " " + clothType,
+                checked: !e.closed[clothType]
+            })
+        return locker1
+    }).flat())
+})
+
+router.post("/editLockers", async (req, res) => {
+    let lockers = await locker.find()
+    let currentArrayIndex = 0
+    // noinspection ES6MissingAwait
+    lockers.forEach(async (e,i)=>{
+        let updateObj = {}
+        for (const clothType of ["Vetement", "Sac", "Relou"])
+            if (e.usedSpace[clothType] !== 0 || !e.closed[clothType]) {
+                updateObj[`closed.${clothType}`] = !req.body[currentArrayIndex]
+                currentArrayIndex += 1
+            }
+        await locker.updateOne({_id: e._id}, updateObj)
+    })
+
 })
 module.exports = router

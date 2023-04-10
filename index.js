@@ -54,8 +54,7 @@ mongoose.connect(
 );
 //mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false
 
-const mode = process.env.MODE || "buy"
-console.log( mode)
+const mode = process.env.MODE || "bal"
 server.on("request", app)
 let dashboardSocket;
 wss.on("connection", (socket, req)=>{

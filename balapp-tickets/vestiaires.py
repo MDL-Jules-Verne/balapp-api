@@ -13,15 +13,15 @@ def percent_float(string):
 parser = argparse.ArgumentParser()
 parser.add_argument('command', type=percent_float, help="list/remove/add")
 parser.add_argument('--id', type=int, help="idNumber of the locker to delete when using remove command")
-parser.add_argument('--sac', action='store_true', help="Accepte les sacs")
-parser.add_argument('--vetement', action='store_true', help="Accepte les vêtements")
-parser.add_argument('--relou', action='store_true', help="Accepte autres")
+parser.add_argument('--Sac', action='store_true', help="Accepte les sacs")
+parser.add_argument('--Vetement', action='store_true', help="Accepte les vêtements")
+parser.add_argument('--Relou', action='store_true', help="Accepte autres")
 parser.add_argument('--mongo', type=str, help="Spécifier une string de connection MongoDB")
 args = parser.parse_args()
 
 if args.command == "remove" and not args.id:
     parser.error('--id is required when removing a locker')
-if args.command == "add" and not args.vetement and not args.sac and not args.relou:
+if args.command == "add" and not args.Vetement and not args.Sac and not args.Relou:
     parser.error("Au moins un type d'objet doit être accepté")
 
 # Test connection to server
@@ -33,13 +33,38 @@ try:
 except pymongo.errors.ServerSelectionTimeoutError:
     print("MongoDB server cannot be reached at " + ("mongodb://localhost:27017" if args.mongo is None else args.mongo))
     exit(1)
+client = client["balapp"]
 
 if args.command == "list":
-    pass
+    lockers = client["lockers"].find()
+    for locker in lockers:
+        print(f"Vestiaire {locker['idNumber']}:")
+        for clothType in ["Vetement", "Sac", "Relou"]:
+            if not locker["closed"][clothType] or locker["usedSpace"][clothType] != 0:
+                print(
+                    f"{clothType}: {'Closed' if locker['closed'][clothType] else 'Open'} || Used space: {locker['usedSpace'][clothType]}")
+
+        print("")
+
     # TODO : list all lockers
 elif args.command == "add":
-    pass
-    # TODO: Add locker
+    lockers = client["lockers"].find()
+    max_idNumber = 1
+    try:
+        max_idNumber = max(node["idNumber"] for node in lockers)+1
+    except ValueError:
+        pass
+
+    newLocker = {
+        "idNumber": max_idNumber,
+        "usedSpace": {},
+        "closed": {}
+    }
+    for clothType in ["Vetement", "Sac", "Relou"]:
+        newLocker["usedSpace"][clothType] = 0
+        newLocker["closed"][clothType] = not args.__dict__[clothType]
+    client["lockers"].insert_one(newLocker)
+
 elif args.command == "remove":
-    # TODO: Remove locker
-    pass
+    client["lockers"].delete_one({"idNumber": args.id})
+

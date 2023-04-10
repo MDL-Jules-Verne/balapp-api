@@ -14,7 +14,6 @@ from groupTicketsByPage import group_tickets
 chars = "RTPQSDFGHJKLWXCVB3456789"
 inter = ImageFont.truetype('Inter-Bold.ttf', 35)
 idLength = 4
-nb_of_tickets = 500
 
 def get_random_string(size):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -30,6 +29,7 @@ if len(sys.argv) < 3:
     print("Using localhost and default port for mongo... \nSyntax: 'python main.py <nb of tickets> [mongoDB host]'")
     sys.argv.append("mongodb://localhost:27017")
 
+nb_of_tickets = int(sys.argv[1])
 client = pymongo.MongoClient(
     sys.argv[2],
     serverSelectionTimeoutMS=5000, connect=True)

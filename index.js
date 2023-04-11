@@ -40,7 +40,7 @@ app.get('/inter.css', async (req,res)=>{
 app.get('/tailwind.js', async (req,res)=>{
     res.send(fs.readFileSync("tailwind.js", {encoding:"utf-8"}))
 })
-//TODD: connect to local database
+
 mongoose.set('strictQuery', false);
 mongoose.connect(
     "mongodb://127.0.0.1:27017/balapp",

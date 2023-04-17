@@ -38,5 +38,6 @@ Vous êtes prêt à faire entrer vos participants !
 
 ## Informations supplémentaires
 Pour savoir comment utiliser l'application, voir [la documentation de l'application](https://github.com/MDL-Jules-Verne/balapp)
-Pendant le bal, pour des raisons humaines, il arrive que des erreurs appairassent. Nous conseillons donc de garder au moins une personne en charge du bon fonctionnement du système  
+Pendant le bal, des erreurs humaines faites lors du rangement des vêtements peuvent fausser les informations de l'application.
+Nous conseillons donc de garder au moins une personne en charge du bon fonctionnement du système  
 Le [dashboard](https://github.com/MDL-Jules-Verne/balapp-api/blob/main/DASHBOARD.md) contient tout ce sur quoi vous avez (normalement) besoin d'intervenir au cours de la soirée. Il est conseillé de s'approprier le fonctionnement global de l'application avant de l'utiliser 

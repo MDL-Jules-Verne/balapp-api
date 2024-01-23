@@ -43,7 +43,7 @@ app.get('/tailwind.js', async (req,res)=>{
 
 mongoose.set('strictQuery', false);
 mongoose.connect(
-    "mongodb://127.0.0.1:27017/balapp",
+    "mongodb://apiUser:Q4qQSDsqCQd787zs6SqXf8dvq7daq86f7DSQDSqd57sqZ@localhost:8586/balapp?authMechanism=DEFAULT&authSource=winhalla",
     // "mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false",
     {useNewUrlParser: true, useUnifiedTopology: true},
     (err) => {
@@ -54,7 +54,8 @@ mongoose.connect(
 );
 //mongodb://balapp:7fFeCDS3TlPSHDRn8yAk@45.135.56.131:8586/balapp?authSource=winhalla&readPreference=primary&directConnection=true&ssl=false
 
-const mode = process.env.MODE || "bal"
+const mode = process.env.MODE.substring(0, process.env.MODE.length - 1) || "bal"
+
 server.on("request", app)
 let dashboardSocket;
 wss.on("connection", (socket, req)=>{

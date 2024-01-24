@@ -33,7 +33,7 @@
         }
 
         function syncTicket(){
-            fetch("http://localhost:2000/syncTicket/" + document.getElementById("updateTicket").value).then(function(response) {
+            fetch("http://34.74.231.245:2000/syncTicket/" + document.getElementById("updateTicket").value).then(function(response) {
                 return response.json();
             }).then(function(data) {
                 console.log(data);
@@ -42,7 +42,7 @@
             });
         }
         function resetTicket(){
-            fetch("http://localhost:2000/resetTicket/" + document.getElementById("updateTicket").value).then(function(response) {
+            fetch("http://34.74.231.245:2000/resetTicket/" + document.getElementById("updateTicket").value).then(function(response) {
                 return response.json();
             }).then(function(data) {
                 console.log(data);
@@ -81,7 +81,7 @@
     let allSocketsList = []
     let eventLogDOM = []
     const eventLogDiv = document.getElementById("eventLog")
-    let ws = new WebSocket("ws://localhost:2000");
+    let ws = new WebSocket("ws://34.74.231.245:2000");
     ws.onopen = () => {
         ws.send("dashboardConnect");
     }
